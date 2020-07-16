@@ -1,0 +1,47 @@
+# ownCloud with MariaDB/MySQL
+#
+# Access via "http://localhost:8080" (or "http://$(docker-machine ip):8080" if using docker-machine)
+#
+# During initial ownCloud setup, select "Storage & database" --> "Configure the database" --> "MySQL/MariaDB"
+# (For initial setup at web interface)
+# Database user: "root"
+# Database password: <example>
+# Database name: pick any name
+# Database host: replace "localhost" with "mysql" or "postgres"
+
+version: '2'
+
+services:
+
+  # Create owncloud container
+  owncloud:
+    image: owncloud
+    expose: ["port"]
+    container_name: gowncloud
+    hostname: 'your_domain_name'
+    environment:
+      - VIRTUAL_HOST=owncloud.doer.metastudio  
+#      - VIRTUAL_PROTO=https
+    ports:
+      - host_port:80
+      - host_port:443
+    links:
+      - postgres
+    volumes:
+      - /data/owncloud/volumes/apps:/var/www/html/apps
+      - /data/owncloud/volumes/data:/var/www/html/data
+      - /data/owncloud/volumes/config:/var/www/html/config
+
+  # Create postgres container
+  postgres:
+    image: postgres
+    container_name: owncloud-postgres
+    environment:
+      - POSTGRES_PASSWORD:YourPassWord
+    volumes:
+      - /data/owncloud/volumes/postgres/var/lib/postgresql/data:/var/lib/postgresql/data
+
+networks:
+  default:
+    external:
+      name: doer-bridge-network
